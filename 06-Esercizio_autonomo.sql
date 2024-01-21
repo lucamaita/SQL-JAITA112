@@ -31,15 +31,17 @@ CREATE TABLE Merci
     quantita INT,
     prezzo DOUBLE
 );
+DROP TABLE Merci;
 
 -- Creare la tabella Ordini, che avrà id int PK AI, dataAcquisto date, pezzi int, idMerce int
 CREATE TABLE Ordini
 (
 	id INT PRIMARY KEY AUTO_INCREMENT,
-    dataAquisto DATE,
+    dataAcquisto DATE,
     pezzi INT,
     idMerce INT
 );
+DROP TABLE ordini;
 
 -- Che relazione c'è tra le due tabelle? Serve una colonna FK o esiste già tra quelle elencate?
 # N-N, Una Merce puo essere contenuta in molti ordini, e un ordine puo contenere piu merci.
@@ -69,7 +71,7 @@ VALUES
 ("Patatine Classiche", "Snack", '2023-11-15', 40, 1.29),
 ("Deodorante Spray", "Bellezza", '2024-04-20', 30, 2.99);
 
-INSERT INTO Ordini (dataAquisto, pezzi, idMerce) 
+INSERT INTO Ordini (dataAcquisto, pezzi, idMerce) 
 VALUES
 ('2024-01-01', 5, 1),
 ('2024-01-02', 3, 2),
@@ -81,6 +83,12 @@ VALUES
 ('2024-01-08', 12, 8),
 ('2024-01-09', 7, 9),
 ('2024-01-10', 9, 10);
+
+SELECT * 
+FROM Merci;
+
+SELECT *
+FROM Ordini;
 
 -- Solo le merci in esaurimento (5 pezzi o meno in magazzino)
 SELECT * 
@@ -98,6 +106,35 @@ FROM Merci
 GROUP BY Categoria;
 
 -- Il prezzo medio degli ordini acquistati
-SELECT AVG (Merci.prezzo) AS PrezzoMedio
+SELECT AVG(Ordini.pezzi * Merci.prezzo)
+FROM Merci INNER JOIN Ordini ON Merci.id = Ordini.idMerce;
+
+-- Il prezzo medio degli ordini acquistati in base alla categoria
+SELECT Merci.categoria, AVG(Ordini.pezzi * Merci.prezzo)
+FROM Merci INNER JOIN Ordini ON Merci.id = Ordini.idMerce
+GROUP BY Merci.categoria;
+
+-- Gli ordini con una spesa totale superiore alla media
+SELECT Ordini.id, Ordini.dataAcquisto, Ordini.pezzi, Ordini.idMerce, (Ordini.pezzi * merci.prezzo) AS Costo_Ordine
+FROM Merci INNER JOIN Ordini ON Merci.id = Ordini.idMerce
+WHERE (Ordini.pezzi * Merci.prezzo) > (SELECT AVG(pezzi * prezzo) FROM Merci);
+
+-- Il numero di ordini di merci scadute
+SELECT COUNT(*) AS Ordini_Scaduti
+FROM Merci INNER JOIN Ordini ON Merci.id = Ordini.idMerce
+WHERE Merci.dataScadenza < CURDATE();
+
+-- Il nome dei prodotti scaduti
+SELECT Nome
+FROM Merci
+WHERE Merci.dataScadenza < CURDATE();
+
+-- Il nome dei prodotti in scadenza (entro 3 giorni dalla data odierna)
+SELECT Nome
+FROM Merci
+WHERE DATEDIFF(dataScadenza, CURDATE()) <= 3 AND DATEDIFF(dataScadenza, CURDATE()) >= 0;
+
+-- Il numero di ordini effettuati per ogni mese
+SELECT MONTH(dataAcquisto) AS Mese, COUNT(id)
 FROM Ordini
-JOIN Merci ON Ordini.idMerce = Merci.id;
+GROUP BY MONTH (dataAcquisto);
