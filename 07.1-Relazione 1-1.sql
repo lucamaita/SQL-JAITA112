@@ -57,6 +57,8 @@ INSERT INTO Dipendenti (id, mansione, anniEsperienza, stipendio, reparto, tipoCo
 
 SELECT * FROM Dipendenti;
 
+DROP TABLE Dipendenti;
+
 # Voglio vedere tutti i dati complessivi di ogni persona
 SELECT *
 FROM Persone LEFT JOIN Dipendenti ON Persone.id = Dipendenti.id;
@@ -83,6 +85,21 @@ FROM 		dipendenti
 GROUP BY	tipoContratto;
 
 # Voglio vedere il nominativo e il numero di anni che mancano alla pensione (la pensione avviene a 70 anni compiuti o a 45 lavorati)
-SELECT 	CONCAT(nome," ",cognome) AS Nominativo
-FROM	Persone;
+SELECT 	CONCAT(nome," ",cognome) AS Nominativo,
+		TRUNCATE(DATEDIFF(NOW(),dob)/365.25,0) AS Eta,
+        anniEsperienza,
+        LEAST(70 - TRUNCATE(DATEDIFF(CURDATE(), dob) / 365.25,0), 45 - anniEsperienza) AS anniMancantiPensione
+FROM 	Persone LEFT JOIN Dipendenti ON Persone.id = Dipendenti.id;
+
+# Voglio vedere lo stipendio medio in base al genere
+-- Le medie in questo caso specifico coincidono, ma sono due calcoli separati, facendo un update degli stipendi si puo controllare.
+SELECT Genere, AVG(Dipendenti.stipendio) AS Media_Stipendio
+FROM Persone LEFT JOIN Dipendenti ON Persone.id = Dipendenti.id
+GROUP BY Genere;	
+
+# Voglio vedere il nominativo della persona che prende lo stipendio maggiore in base alla mansione
+ 
+# Voglio vedere quante persone prendono uno stipendio inferiore allo stipendio medio generale
+
+# Voglio vedere l'eta media in base alla tipologia di contratto
 
