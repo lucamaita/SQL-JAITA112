@@ -43,7 +43,9 @@ INSERT INTO libri (titolo, genere, numero_pagine, casa_editrice, prezzo, idAutor
 ('Cent\'anni di solitudine', 'Magic Realism', 417, 'Feltrinelli' ,22.95, 5),
 ('Orgoglio e pregiudizio', 'Romance', 279, 'Mondadori' ,16.99, 6);
 
-
+SELECT *
+FROM Libri
+WHERE libri.prezzo <= 20;
 
 
 
